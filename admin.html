@@ -3,18 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chewiwi Admin | Inventory Management</title>
+    <title>Chewiwi Admin | Inventory</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="style.css">
 </head>
-<body class="bg-light">
+<body>
 
-    <nav class="navbar sticky-top shadow-sm bg-white">
+    <nav class="navbar sticky-top shadow-sm">
         <div class="container">
-            <a class="navbar-brand fw-bold" href="index.html">CHEWIWI <span class="badge bg-dark ms-2 text-uppercase" style="font-size: 10px;">Admin Panel</span></a>
+            <a class="navbar-brand fw-bold" href="index.html">CHEWIWI <span class="badge bg-dark ms-2" style="font-size: 10px;">ADMIN</span></a>
             <div class="d-flex align-items-center">
-                <a href="index.html" class="btn btn-sm btn-outline-dark me-3">View Shop</a>
+                <a href="index.html" class="text-decoration-none fw-bold text-dark me-4 small">View Shop</a>
                 <button class="btn btn-sm btn-link text-danger text-decoration-none fw-bold" onclick="logoutUser()">Logout</button>
             </div>
         </div>
@@ -23,21 +23,21 @@
     <div class="container py-5">
         <div class="row align-items-center mb-5">
             <div class="col-md-6">
-                <h2 class="fw-bold m-0">Inventory Management</h2>
-                <p class="text-muted">Create, Update, and Delete your shop items.</p>
+                <h2 class="main-title m-0">Inventory Management</h2>
+                <p class="text-muted">Meticulously manage your product kits below.</p>
             </div>
             <div class="col-md-6 text-md-end">
-                <button class="btn btn-chewiwi shadow-sm px-4 py-2 fw-bold" onclick="showAddModal()">
+                <button class="btn btn-chewiwi shadow-sm px-4" onclick="showAddModal()">
                     <i class="bi bi-plus-lg me-2"></i>Add New Product
                 </button>
             </div>
         </div>
 
-        <div class="bg-white shadow-sm border-0" style="border-radius: 20px; overflow: hidden;">
+        <div class="cart-container overflow-hidden">
             <table class="table table-hover align-middle mb-0">
-                <thead class="bg-dark text-white">
+                <thead style="background-color: var(--brand-dark); color: var(--brand-accent);">
                     <tr>
-                        <th class="ps-4 py-3">Product Details</th>
+                        <th class="ps-4 py-3">Product Kit</th>
                         <th class="py-3">Price</th>
                         <th class="py-3 text-end pe-4">Actions</th>
                     </tr>
@@ -50,26 +50,27 @@
 
     <div class="modal fade" id="productModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content border-0 shadow-lg" style="border-radius: 25px;">
+            <div class="modal-content border-0 shadow-lg">
                 <div class="modal-body p-5">
                     <h3 class="fw-bold mb-4" id="modalTitle">Product Details</h3>
                     <input type="hidden" id="edit-id">
                     
                     <div class="mb-3">
                         <label class="form-label text-muted small fw-bold">Product Name</label>
-                        <input type="text" id="prod-name" class="form-control custom-input" placeholder="e.g., Tokyo Ramen Kit" required>
+                        <input type="text" id="prod-name" class="form-control custom-input" placeholder="e.g., Tokyo Sakura Kit" required>
                     </div>
                     <div class="mb-3">
                         <label class="form-label text-muted small fw-bold">Price (₱)</label>
-                        <input type="number" id="prod-price" class="form-control custom-input" placeholder="1500" required>
+                        <input type="number" id="prod-price" class="form-control custom-input" placeholder="0.00" required>
                     </div>
                     <div class="mb-4">
                         <label class="form-label text-muted small fw-bold">Image URL</label>
-                        <input type="text" id="prod-img" class="form-control custom-input" placeholder="Paste image link here..." required>
+                        <input type="text" id="prod-img" class="form-control custom-input" placeholder="Paste link from Unsplash..." required>
                     </div>
                     
-                    <div class="d-grid">
-                        <button class="btn btn-chewiwi py-3 fw-bold" onclick="handleSave()">Save to Inventory</button>
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-chewiwi py-3" onclick="handleSave()">Save to Inventory</button>
+                        <button type="button" class="btn btn-link text-muted text-decoration-none small" data-bs-dismiss="modal">Cancel</button>
                     </div>
                 </div>
             </div>
@@ -77,17 +78,15 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="auth.js"></script>
-    
     <script>
-        // Security Gate: Check if user is actually admin
+        // Security: Ensure only Admin can access
         const currentUser = JSON.parse(localStorage.getItem("currentUser"));
         if (!currentUser || currentUser.role !== "admin") {
-            alert("Access Denied: Admins Only");
+            alert("Unauthorized Access. Redirecting to Shop...");
             window.location.href = "index.html";
         }
 
-        // --- CRUD LOGIC ---
+        // Logic Initialization
         let allProducts = JSON.parse(localStorage.getItem("storedProducts")) || [];
         let editMode = false;
         let productModal;
@@ -97,7 +96,7 @@
             loadAdminTable();
         });
 
-        // 1. READ: Display items
+        // READ
         function loadAdminTable() {
             const tableBody = document.getElementById('admin-product-table');
             if(!tableBody) return;
@@ -105,38 +104,37 @@
             tableBody.innerHTML = '';
             
             if(allProducts.length === 0) {
-                tableBody.innerHTML = `<tr><td colspan="3" class="text-center py-5 text-muted">No products found in inventory.</td></tr>`;
+                tableBody.innerHTML = `<tr><td colspan="3" class="text-center py-5 text-muted">Inventory is empty. Add a kit to get started.</td></tr>`;
             }
 
             allProducts.forEach((p, index) => {
                 tableBody.innerHTML += `
                     <tr>
-                        <td class="ps-4">
+                        <td class="ps-4 py-3">
                             <div class="d-flex align-items-center">
-                                <img src="${p.image}" class="rounded me-3 shadow-sm" style="width:50px; height:50px; object-fit:cover;">
+                                <img src="${p.image}" class="cart-product-img me-3 shadow-sm" style="width:50px; height:50px;">
                                 <div>
-                                    <span class="fw-bold d-block">${p.name}</span>
-                                    <small class="text-muted">ID: #${p.id}</small>
+                                    <span class="product-name d-block">${p.name}</span>
+                                    <small class="text-muted">SKU: CHW-${p.id}</small>
                                 </div>
                             </div>
                         </td>
-                        <td class="fw-bold text-success">₱${p.price.toLocaleString()}</td>
+                        <td class="fw-bold">₱${p.price.toLocaleString()}</td>
                         <td class="text-end pe-4">
-                            <button class="btn btn-sm btn-outline-primary me-2" onclick="openEdit(${p.id})">
-                                <i class="bi bi-pencil-square"></i> Edit
+                            <button class="btn btn-sm btn-remove me-2" onclick="openEdit(${p.id})">
+                                <i class="bi bi-pencil-square h5"></i>
                             </button>
-                            <button class="btn btn-sm btn-outline-danger" onclick="deleteProduct(${index})">
-                                <i class="bi bi-trash3"></i>
+                            <button class="btn btn-sm btn-remove" onclick="deleteProduct(${index})">
+                                <i class="bi bi-trash3-fill h5 text-danger"></i>
                             </button>
                         </td>
                     </tr>`;
             });
 
-            // Keep index.html updated
             localStorage.setItem("storedProducts", JSON.stringify(allProducts));
         }
 
-        // 2. CREATE: Open blank modal
+        // CREATE
         function showAddModal() {
             editMode = false;
             document.getElementById('modalTitle').innerText = "Add New Kit";
@@ -147,11 +145,11 @@
             productModal.show();
         }
 
-        // 3. UPDATE: Open filled modal
+        // UPDATE
         function openEdit(id) {
             editMode = true;
             const item = allProducts.find(p => p.id === id);
-            document.getElementById('modalTitle').innerText = "Update Product";
+            document.getElementById('modalTitle').innerText = "Edit Product Kit";
             document.getElementById('edit-id').value = item.id;
             document.getElementById('prod-name').value = item.name;
             document.getElementById('prod-price').value = item.price;
@@ -159,24 +157,22 @@
             productModal.show();
         }
 
-        // SAVE BUTTON (Handles both Create and Update)
+        // SAVE
         function handleSave() {
             const name = document.getElementById('prod-name').value;
             const price = parseInt(document.getElementById('prod-price').value);
             const img = document.getElementById('prod-img').value;
 
             if(!name || !price || !img) {
-                alert("Please complete all product details.");
+                alert("Please fill out all fields.");
                 return;
             }
 
             if (editMode) {
-                // Update Logic
                 const id = parseInt(document.getElementById('edit-id').value);
                 const index = allProducts.findIndex(p => p.id === id);
                 allProducts[index] = { ...allProducts[index], name, price, image: img };
             } else {
-                // Create Logic: Generate a unique ID
                 const newId = allProducts.length > 0 ? Math.max(...allProducts.map(p => p.id)) + 1 : 1;
                 allProducts.push({ id: newId, name, price, image: img });
             }
@@ -185,9 +181,9 @@
             productModal.hide();
         }
 
-        // 4. DELETE: Remove item
+        // DELETE
         function deleteProduct(index) {
-            if(confirm("Confirm deletion? This will remove the item from the shop for all users.")) {
+            if(confirm("Are you sure you want to remove this item permanently?")) {
                 allProducts.splice(index, 1);
                 loadAdminTable();
             }
