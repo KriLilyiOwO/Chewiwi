@@ -11,7 +11,19 @@ const productList = document.getElementById("product-list");
 
 // --- SHOP PAGE LOGIC ---
 if(productList) {
+  // Check if someone is logged in as an admin
+  const currentUser = JSON.parse(localStorage.getItem("currentUser"));
+  const isAdmin = currentUser && currentUser.role === "admin";
+
   products.forEach(p => {
+    // Determine which button to show
+    let buttonHTML = "";
+    if (isAdmin) {
+        buttonHTML = `<button class="btn btn-outline-dark mt-auto" onclick="alert('Admin: Stock Management for ${p.name}')">Edit Stock</button>`;
+    } else {
+        buttonHTML = `<button class="btn btn-checkout mt-auto" onclick="addToCart(${p.id})">Add to Cart</button>`;
+    }
+
     productList.innerHTML += `
       <div class="col-md-4 mb-4">
         <div class="card h-100 border-0 shadow-sm" style="border-radius: 15px; overflow: hidden;">
@@ -19,7 +31,7 @@ if(productList) {
           <div class="card-body d-flex flex-column">
             <h5 class="fw-bold product-name">${p.name}</h5>
             <p class="text-muted">₱${p.price.toLocaleString()}</p>
-            <button class="btn btn-checkout mt-auto" onclick="addToCart(${p.id})">Add to Cart</button>
+            ${buttonHTML}
           </div>
         </div>
       </div>`;
