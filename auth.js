@@ -29,17 +29,16 @@ function logoutUser() {
 
 // --- DYNAMIC NAVBAR UPDATE ---
 function updateNavbar() {
-    const navRight = document.querySelector('.navbar .d-flex');
+    const navRight = document.getElementById('nav-actions'); // Updated ID
     const user = JSON.parse(localStorage.getItem("currentUser"));
 
     if (user && navRight) {
         navRight.innerHTML = `
-            <span class="me-3 small fw-bold text-muted">${user.role.toUpperCase()} MODE</span>
-            ${user.role === 'admin' ? '<a href="admin.html" class="btn btn-sm btn-outline-dark me-2">Admin Panel</a>' : ''}
+            <span class="me-3 small fw-bold text-muted">${user.role === 'admin' ? '🛠️ ADMIN' : '👤 USER'}</span>
+            ${user.role === 'admin' ? '<a href="admin.html" class="btn btn-sm btn-outline-dark me-2">Dashboard</a>' : ''}
             <a href="cart.html" class="btn btn-sm btn-chewiwi me-2">Cart</a>
-            <button class="btn btn-sm btn-link text-danger text-decoration-none" onclick="logoutUser()">Logout</button>
+            <button class="btn btn-sm btn-link text-danger p-0 text-decoration-none" onclick="logoutUser()">Logout</button>
         `;
     }
 }
-
 document.addEventListener('DOMContentLoaded', updateNavbar);
