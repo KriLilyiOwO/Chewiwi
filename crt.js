@@ -1,25 +1,36 @@
-const products = [
-  { id: 1, name: "Tokyo Sakura Date Night Kit", price: 1890, image: "https://images.unsplash.com/photo-1515003197210-e0cd71810b5f?q=80&w=800" },
-  { id: 2, name: "Busan K-Drama Comfort Box", price: 1650, image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=800" },
-  { id: 3, name: "Tokyo Anime Movie Night Kit", price: 2100, image: "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?q=80&w=800" },
-  { id: 4, name: "Busan Korean BBQ Home Kit", price: 2450, image: "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?q=80&w=800" },
-  { id: 5, name: "Tokyo Harajuku Sweet Treat Box", price: 1450, image: "https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80&w=800" },
-  { id: 6, name: "Busan Beach Picnic Kit", price: 1750, image: "https://images.unsplash.com/photo-1529042410759-befb1204b468?q=80&w=800" }
+// --- PRODUCT DATABASE (Syncs with Admin CRUD) ---
+const defaultProducts = [
+    { id: 1, name: "Tokyo Sakura Date Night Kit", price: 1890, image: "https://images.unsplash.com/photo-1515003197210-e0cd71810b5f?q=80&w=800" },
+    { id: 2, name: "Busan K-Drama Comfort Box", price: 1650, image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=800" },
+    { id: 3, name: "Tokyo Anime Movie Night Kit", price: 2100, image: "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?q=80&w=800" },
+    { id: 4, name: "Busan Korean BBQ Home Kit", price: 2450, image: "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?q=80&w=800" },
+    { id: 5, name: "Tokyo Harajuku Sweet Treat Box", price: 1450, image: "https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80&w=800" },
+    { id: 6, name: "Busan Beach Picnic Kit", price: 1750, image: "https://images.unsplash.com/photo-1529042410759-befb1204b468?q=80&w=800" }
 ];
+
+// Pull from localStorage so Admin changes (Delete/Update) show up here
+let products = JSON.parse(localStorage.getItem("storedProducts")) || defaultProducts;
+
+// Save the list if it's the first time running
+if (!localStorage.getItem("storedProducts")) {
+    localStorage.setItem("storedProducts", JSON.stringify(products));
+}
 
 const productList = document.getElementById("product-list"); 
 
 // --- SHOP PAGE LOGIC ---
 if(productList) {
-  // Check if someone is logged in as an admin
   const currentUser = JSON.parse(localStorage.getItem("currentUser"));
   const isAdmin = currentUser && currentUser.role === "admin";
 
+  // Clear existing content to avoid duplication on refresh
+  productList.innerHTML = '';
+
   products.forEach(p => {
-    // Determine which button to show
     let buttonHTML = "";
     if (isAdmin) {
-        buttonHTML = `<button class="btn btn-outline-dark mt-auto" onclick="alert('Admin: Stock Management for ${p.name}')">Edit Stock</button>`;
+        // Redirects Admin to the management page
+        buttonHTML = `<a href="admin.html" class="btn btn-outline-dark mt-auto">Edit in Admin</a>`;
     } else {
         buttonHTML = `<button class="btn btn-checkout mt-auto" onclick="addToCart(${p.id})">Add to Cart</button>`;
     }
@@ -38,7 +49,9 @@ if(productList) {
   });
 }
 
+// --- ADD TO CART LOGIC ---
 function addToCart(id) {
+  // Always find from the current products list (important if price was updated)
   const product = products.find(p => p.id === id);
   let cart = JSON.parse(localStorage.getItem("cart")) || [];
   const existing = cart.find(item => item.id === id);
@@ -68,7 +81,7 @@ function renderCart() {
     container.innerHTML = '';
 
     if (cart.length === 0) {
-        container.innerHTML = '<p class="text-center py-5 text-muted">Your cart is empty.</p>';
+        container.innerHTML = '<div class="text-center py-5"><p class="text-muted">Your cart is empty.</p></div>';
         updateTotals(0);
         return;
     }
@@ -80,7 +93,7 @@ function renderCart() {
         container.innerHTML += `
         <div class="row align-items-center mb-4 cart-item">
             <div class="col-5 d-flex align-items-center">
-                <img src="${item.image}" class="cart-product-img me-3">
+                <img src="${item.image}" class="cart-product-img me-3" style="width: 70px; height: 70px; object-fit: cover; border-radius: 10px;">
                 <div>
                     <h6 class="mb-0 fw-bold product-name">${item.name}</h6>
                     <small class="text-muted">₱${item.price.toLocaleString()}</small>
@@ -88,15 +101,15 @@ function renderCart() {
             </div>
             <div class="col-2 text-center fw-bold">₱${item.price.toLocaleString()}</div>
             <div class="col-3 d-flex justify-content-center">
-                <div class="qty-control d-flex align-items-center">
-                    <button class="btn btn-sm btn-qty" onclick="changeQty(${index}, 1)">+</button>
-                    <input type="text" value="${item.quantity}" class="form-control form-control-sm text-center qty-input" readonly>
-                    <button class="btn btn-sm btn-qty" onclick="changeQty(${index}, -1)">-</button>
+                <div class="qty-control d-flex align-items-center border rounded">
+                    <button class="btn btn-sm" onclick="changeQty(${index}, -1)">-</button>
+                    <input type="text" value="${item.quantity}" class="form-control form-control-sm text-center border-0 bg-transparent" style="width: 40px;" readonly>
+                    <button class="btn btn-sm" onclick="changeQty(${index}, 1)">+</button>
                 </div>
             </div>
             <div class="col-2 text-end d-flex align-items-center justify-content-end">
                 <span class="text-success fw-bold me-3">₱${itemTotal.toLocaleString()}</span>
-                <button class="btn btn-link btn-remove p-0" onclick="removeItem(${index})">
+                <button class="btn btn-link text-danger p-0" onclick="removeItem(${index})">
                     <i class="bi bi-trash3-fill h5"></i>
                 </button>
             </div>
